@@ -77,7 +77,9 @@ router.get("/", async (_req, res) => {
 router.post("/", validate(createUserSchema), async (req, res) => {
   const payload = req.body as z.infer<typeof createUserSchema>;
 
-  const existing = await prisma.user.findUnique({ where: { email: payload.email } });
+  const existing = await prisma.user.findUnique({
+    where: { email: payload.email },
+  });
 
   if (existing) {
     throw new ApiError(409, "Email is already in use");
@@ -123,7 +125,12 @@ router.patch("/:id", validate(updateUserSchema), async (req, res) => {
     throw new ApiError(400, "You cannot deactivate your own account");
   }
 
-  if (req.user && req.user.id === id && payload.role && payload.role !== Role.ADMIN) {
+  if (
+    req.user &&
+    req.user.id === id &&
+    payload.role &&
+    payload.role !== Role.ADMIN
+  ) {
     throw new ApiError(400, "You cannot remove your own admin role");
   }
 

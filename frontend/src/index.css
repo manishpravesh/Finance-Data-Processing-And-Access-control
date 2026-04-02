@@ -2,8 +2,13 @@
 
 :root {
   --bg: #f7f6f2;
-  --bg-glow: radial-gradient(circle at 0% 0%, rgba(230, 84, 45, 0.22), transparent 42%),
-    radial-gradient(circle at 100% 10%, rgba(28, 116, 197, 0.2), transparent 48%);
+  --bg-glow:
+    radial-gradient(circle at 0% 0%, rgba(230, 84, 45, 0.22), transparent 42%),
+    radial-gradient(
+      circle at 100% 10%,
+      rgba(28, 116, 197, 0.2),
+      transparent 48%
+    );
   --panel: rgba(255, 255, 255, 0.83);
   --panel-soft: rgba(245, 250, 255, 0.9);
   --ink: #172436;

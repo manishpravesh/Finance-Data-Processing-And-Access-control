@@ -135,29 +135,34 @@ router.get("/:id", async (req, res) => {
   res.json({ success: true, data: record });
 });
 
-router.post("/", authorize(Role.ADMIN), validate(createRecordSchema), async (req, res) => {
-  const payload = req.body as z.infer<typeof createRecordSchema>;
+router.post(
+  "/",
+  authorize(Role.ADMIN),
+  validate(createRecordSchema),
+  async (req, res) => {
+    const payload = req.body as z.infer<typeof createRecordSchema>;
 
-  if (!req.user) {
-    throw new ApiError(401, "Authentication required");
-  }
+    if (!req.user) {
+      throw new ApiError(401, "Authentication required");
+    }
 
-  const record = await prisma.financialRecord.create({
-    data: {
-      amount: payload.amount,
-      type: toRecordType(payload.type),
-      category: payload.category,
-      date: new Date(payload.date),
-      notes: payload.notes,
-      createdById: req.user.id,
-    },
-  });
+    const record = await prisma.financialRecord.create({
+      data: {
+        amount: payload.amount,
+        type: toRecordType(payload.type),
+        category: payload.category,
+        date: new Date(payload.date),
+        notes: payload.notes,
+        createdById: req.user.id,
+      },
+    });
 
-  res.status(201).json({
-    success: true,
-    data: record,
-  });
-});
+    res.status(201).json({
+      success: true,
+      data: record,
+    });
+  },
+);
 
 router.patch(
   "/:id",

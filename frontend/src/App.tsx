@@ -79,7 +79,9 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
 
 function App() {
-  const [token, setToken] = useState<string>(localStorage.getItem("token") ?? "");
+  const [token, setToken] = useState<string>(
+    localStorage.getItem("token") ?? "",
+  );
   const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
     const raw = localStorage.getItem("user");
     if (!raw) {
@@ -188,12 +190,13 @@ function App() {
     setError("");
 
     try {
-      const [summaryData, trendsData, recordsData, usersData] = await Promise.all([
-        apiFetch<SummaryResponse>("/api/dashboard/summary"),
-        apiFetch<TrendResponse>("/api/dashboard/trends?months=6"),
-        apiFetch<RecordListResponse>(buildRecordQuery(filters)),
-        isAdmin ? apiFetch<AppUser[]>("/api/users") : Promise.resolve([]),
-      ]);
+      const [summaryData, trendsData, recordsData, usersData] =
+        await Promise.all([
+          apiFetch<SummaryResponse>("/api/dashboard/summary"),
+          apiFetch<TrendResponse>("/api/dashboard/trends?months=6"),
+          apiFetch<RecordListResponse>(buildRecordQuery(filters)),
+          isAdmin ? apiFetch<AppUser[]>("/api/users") : Promise.resolve([]),
+        ]);
 
       setSummary(summaryData);
       setTrends(trendsData);
@@ -212,13 +215,17 @@ function App() {
     setError("");
 
     try {
-      const data = await apiFetch<{ token: string; user: AppUser }>("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({
-          email: loginEmail,
-          password: loginPassword,
-        }),
-      }, "");
+      const data = await apiFetch<{ token: string; user: AppUser }>(
+        "/api/auth/login",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email: loginEmail,
+            password: loginPassword,
+          }),
+        },
+        "",
+      );
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -247,7 +254,9 @@ function App() {
 
     try {
       setError("");
-      const recordsData = await apiFetch<RecordListResponse>(buildRecordQuery(filters));
+      const recordsData = await apiFetch<RecordListResponse>(
+        buildRecordQuery(filters),
+      );
       setRecords(recordsData);
     } catch (requestError) {
       setError(toMessage(requestError));
@@ -332,8 +341,8 @@ function App() {
           <p className="eyebrow">Finance Control Panel</p>
           <h1>Launch Backend Dashboard</h1>
           <p className="subtle">
-            Deploy backend on Render, deploy this UI on Vercel, and verify role-based
-            financial workflows in minutes.
+            Deploy backend on Render, deploy this UI on Vercel, and verify
+            role-based financial workflows in minutes.
           </p>
 
           <form className="stack" onSubmit={handleLogin}>
@@ -409,7 +418,10 @@ function App() {
               aria-label="Filter by record type"
               value={filters.type}
               onChange={(event) =>
-                setFilters((prev) => ({ ...prev, type: event.target.value as RecordFilters["type"] }))
+                setFilters((prev) => ({
+                  ...prev,
+                  type: event.target.value as RecordFilters["type"],
+                }))
               }
             >
               <option value="">All Types</option>
@@ -420,7 +432,10 @@ function App() {
               placeholder="Category"
               value={filters.category}
               onChange={(event) =>
-                setFilters((prev) => ({ ...prev, category: event.target.value }))
+                setFilters((prev) => ({
+                  ...prev,
+                  category: event.target.value,
+                }))
               }
             />
             <input
@@ -428,7 +443,10 @@ function App() {
               aria-label="Filter start date"
               value={filters.startDate}
               onChange={(event) =>
-                setFilters((prev) => ({ ...prev, startDate: event.target.value }))
+                setFilters((prev) => ({
+                  ...prev,
+                  startDate: event.target.value,
+                }))
               }
             />
             <input
@@ -518,7 +536,10 @@ function App() {
                 placeholder="Amount"
                 value={newRecordForm.amount}
                 onChange={(event) =>
-                  setNewRecordForm((prev) => ({ ...prev, amount: event.target.value }))
+                  setNewRecordForm((prev) => ({
+                    ...prev,
+                    amount: event.target.value,
+                  }))
                 }
                 required
               />
@@ -539,7 +560,10 @@ function App() {
                 placeholder="Category"
                 value={newRecordForm.category}
                 onChange={(event) =>
-                  setNewRecordForm((prev) => ({ ...prev, category: event.target.value }))
+                  setNewRecordForm((prev) => ({
+                    ...prev,
+                    category: event.target.value,
+                  }))
                 }
                 required
               />
@@ -548,7 +572,10 @@ function App() {
                 aria-label="New record date"
                 value={newRecordForm.date}
                 onChange={(event) =>
-                  setNewRecordForm((prev) => ({ ...prev, date: event.target.value }))
+                  setNewRecordForm((prev) => ({
+                    ...prev,
+                    date: event.target.value,
+                  }))
                 }
                 required
               />
@@ -556,7 +583,10 @@ function App() {
                 placeholder="Notes"
                 value={newRecordForm.notes}
                 onChange={(event) =>
-                  setNewRecordForm((prev) => ({ ...prev, notes: event.target.value }))
+                  setNewRecordForm((prev) => ({
+                    ...prev,
+                    notes: event.target.value,
+                  }))
                 }
                 rows={3}
               />
@@ -571,7 +601,10 @@ function App() {
                 placeholder="Name"
                 value={newUserForm.name}
                 onChange={(event) =>
-                  setNewUserForm((prev) => ({ ...prev, name: event.target.value }))
+                  setNewUserForm((prev) => ({
+                    ...prev,
+                    name: event.target.value,
+                  }))
                 }
                 required
               />
@@ -580,7 +613,10 @@ function App() {
                 placeholder="Email"
                 value={newUserForm.email}
                 onChange={(event) =>
-                  setNewUserForm((prev) => ({ ...prev, email: event.target.value }))
+                  setNewUserForm((prev) => ({
+                    ...prev,
+                    email: event.target.value,
+                  }))
                 }
                 required
               />
@@ -589,7 +625,10 @@ function App() {
                 placeholder="Password"
                 value={newUserForm.password}
                 onChange={(event) =>
-                  setNewUserForm((prev) => ({ ...prev, password: event.target.value }))
+                  setNewUserForm((prev) => ({
+                    ...prev,
+                    password: event.target.value,
+                  }))
                 }
                 required
               />
@@ -652,7 +691,9 @@ function App() {
                               const isActive = event.target.checked;
                               setUsers((prev) =>
                                 prev.map((item) =>
-                                  item.id === user.id ? { ...item, isActive } : item,
+                                  item.id === user.id
+                                    ? { ...item, isActive }
+                                    : item,
                                 ),
                               );
                             }}
@@ -661,7 +702,10 @@ function App() {
                         </label>
                       </td>
                       <td>
-                        <button className="small" onClick={() => void updateUser(user)}>
+                        <button
+                          className="small"
+                          onClick={() => void updateUser(user)}
+                        >
                           Save
                         </button>
                       </td>

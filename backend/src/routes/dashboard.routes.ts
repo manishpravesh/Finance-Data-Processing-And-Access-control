@@ -37,93 +37,103 @@ const rangeFromQuery = (query: z.infer<typeof summaryQuerySchema>) => {
 router.use(authenticate);
 router.use(authorize(Role.VIEWER, Role.ANALYST, Role.ADMIN));
 
-router.get("/summary", validate(summaryQuerySchema, "query"), async (req, res) => {
-  const query = summaryQuerySchema.parse(req.query);
+router.get(
+  "/summary",
+  validate(summaryQuerySchema, "query"),
+  async (req, res) => {
+    const query = summaryQuerySchema.parse(req.query);
 
-  const dateRange = rangeFromQuery(query);
-  const where = dateRange ? { date: dateRange } : {};
+    const dateRange = rangeFromQuery(query);
+    const where = dateRange ? { date: dateRange } : {};
 
-  const [incomeAgg, expenseAgg, groupedByCategory, recentActivity] = await Promise.all([
-    prisma.financialRecord.aggregate({
-      where: {
-        ...where,
-        type: RecordType.INCOME,
-      },
-      _sum: { amount: true },
-    }),
-    prisma.financialRecord.aggregate({
-      where: {
-        ...where,
-        type: RecordType.EXPENSE,
-      },
-      _sum: { amount: true },
-    }),
-    prisma.financialRecord.groupBy({
-      by: ["category", "type"],
-      where,
-      _sum: { amount: true },
-      orderBy: { category: "asc" },
-    }),
-    prisma.financialRecord.findMany({
-      where,
-      orderBy: { date: "desc" },
-      take: 8,
-      select: {
-        id: true,
-        amount: true,
-        type: true,
-        category: true,
-        date: true,
-        notes: true,
-        createdBy: {
+    const [incomeAgg, expenseAgg, groupedByCategory, recentActivity] =
+      await Promise.all([
+        prisma.financialRecord.aggregate({
+          where: {
+            ...where,
+            type: RecordType.INCOME,
+          },
+          _sum: { amount: true },
+        }),
+        prisma.financialRecord.aggregate({
+          where: {
+            ...where,
+            type: RecordType.EXPENSE,
+          },
+          _sum: { amount: true },
+        }),
+        prisma.financialRecord.groupBy({
+          by: ["category", "type"],
+          where,
+          _sum: { amount: true },
+          orderBy: { category: "asc" },
+        }),
+        prisma.financialRecord.findMany({
+          where,
+          orderBy: { date: "desc" },
+          take: 8,
           select: {
             id: true,
-            name: true,
-            email: true,
+            amount: true,
+            type: true,
+            category: true,
+            date: true,
+            notes: true,
+            createdBy: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
-        },
-      },
-    }),
-  ]);
+        }),
+      ]);
 
-  const totalIncome = incomeAgg._sum.amount ?? 0;
-  const totalExpenses = expenseAgg._sum.amount ?? 0;
+    const totalIncome = incomeAgg._sum.amount ?? 0;
+    const totalExpenses = expenseAgg._sum.amount ?? 0;
 
-  const categoryMap = new Map<string, { income: number; expense: number }>();
+    const categoryMap = new Map<string, { income: number; expense: number }>();
 
-  for (const row of groupedByCategory) {
-    const existing = categoryMap.get(row.category) ?? { income: 0, expense: 0 };
-    const amount = row._sum.amount ?? 0;
+    for (const row of groupedByCategory) {
+      const existing = categoryMap.get(row.category) ?? {
+        income: 0,
+        expense: 0,
+      };
+      const amount = row._sum.amount ?? 0;
 
-    if (row.type === RecordType.INCOME) {
-      existing.income += amount;
-    } else {
-      existing.expense += amount;
+      if (row.type === RecordType.INCOME) {
+        existing.income += amount;
+      } else {
+        existing.expense += amount;
+      }
+
+      categoryMap.set(row.category, existing);
     }
 
-    categoryMap.set(row.category, existing);
-  }
+    const categoryTotals = [...categoryMap.entries()].map(
+      ([category, totals]) => ({
+        category,
+        income: totals.income,
+        expense: totals.expense,
+        net: totals.income - totals.expense,
+      }),
+    );
 
-  const categoryTotals = [...categoryMap.entries()].map(([category, totals]) => ({
-    category,
-    income: totals.income,
-    expense: totals.expense,
-    net: totals.income - totals.expense,
-  }));
-
-  res.json({
-    success: true,
-    data: {
-      totals: {
-        income: totalIncome,
-        expenses: totalExpenses,
-        netBalance: totalIncome - totalExpenses,
+    res.json({
+      success: true,
+      data: {
+        totals: {
+          income: totalIncome,
+          expenses: totalExpenses,
+          netBalance: totalIncome - totalExpenses,
+        },
+        categoryTotals,
+        recentActivity,
       },
-      categoryTotals,
-      recentActivity,
-    },
-  });
-});
+    });
+  },
+);
 
 router.get("/trends", validate(trendQuerySchema, "query"), async (req, res) => {
   const { months } = trendQuerySchema.parse(req.query);
