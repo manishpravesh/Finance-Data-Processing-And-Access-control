@@ -135,9 +135,9 @@ A `backend/render.yaml` file is included.
 
 Notes:
 
-- SQLite persistence is configured with a mounted disk at `/var/data`.
-- `DATABASE_URL` is set to `file:/var/data/dev.db` in `render.yaml`.
-- Seed users and starter records are auto-applied in the Render build command.
+- Free-tier Render setup uses ephemeral SQLite storage (`DATABASE_URL=file:./dev.db`).
+- Migrations and seed are run in start command so each new instance initializes correctly.
+- Seed users and starter records are auto-applied at startup.
 
 ## 7) Vercel Deployment (Frontend)
 

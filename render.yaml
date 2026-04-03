@@ -3,15 +3,15 @@ services:
     name: finance-access-backend
     runtime: node
     rootDir: backend
-    buildCommand: npm install; npm run build; npm run prisma:deploy; npm run seed
-    startCommand: npm run start
+    buildCommand: npm install; npm run build
+    startCommand: npm run prisma:deploy; npm run seed; npm run start
     plan: free
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
         value: 22.18.0
       - key: DATABASE_URL
-        value: file:/var/data/dev.db
+        value: file:./dev.db
       - key: JWT_SECRET
         sync: false
       - key: JWT_EXPIRES_IN
@@ -20,7 +20,3 @@ services:
         sync: false
       - key: PORT
         value: 10000
-    disk:
-      name: finance-db
-      mountPath: /var/data
-      sizeGB: 1
