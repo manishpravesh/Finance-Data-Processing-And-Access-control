@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: finance-access-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install; npm run build; npm run prisma:deploy; npm run seed
+    startCommand: npm run start
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.18.0
+      - key: DATABASE_URL
+        value: file:/var/data/dev.db
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 12h
+      - key: CORS_ORIGIN
+        sync: false
+      - key: PORT
+        value: 10000
+    disk:
+      name: finance-db
+      mountPath: /var/data
+      sizeGB: 1
